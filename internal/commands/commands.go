@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"git-gud/internal/objects"
 	"git-gud/internal/repository"
 )
 
@@ -40,6 +39,7 @@ func Commit(args []string) {
 func Status(args []string) {
 	fmt.Println("Status...")
 }
+
 func Add(args []string) {
 
 	if len(args) == 0 {
@@ -47,15 +47,29 @@ func Add(args []string) {
 		return
 	}
 	if args[0] == "." || args[0] == "-all" || args[0] == "-A" {
-		files := repository.ReadDirectoryFiles()
-		for _, file := range files {
-			content, err := repository.ReadFile(file.Path)
-			if err != nil {
-				fmt.Println("Error reading file:", err)
-				return
-			}
-			objects.CreateBlobObject(content)
+		addAll()
+	} else {
+		addSpecified(args)
+	}
+}
+
+// HELPERS
+
+func addAll() {
+	files := repository.ReadDirectoryFiles()
+	for _, file := range files {
+		err := handleFileAdd(file.Path)
+		if err != nil {
+			fmt.Println("Error adding file:", err)
 		}
 	}
+}
 
+func addSpecified(files []string) {
+	for _, file := range files {
+		err := handleFileAdd(file)
+		if err != nil {
+			fmt.Println("Error adding file:", err)
+		}
+	}
 }

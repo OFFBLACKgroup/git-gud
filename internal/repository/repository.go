@@ -49,7 +49,6 @@ func WriteFile(filePath string, content interface{}) error {
 	case string:
 		_, writeErr = fileRef.WriteString(v)
 	case []byte:
-		fmt.Println("Writing bytes:", v)
 		_, writeErr = fileRef.Write(v)
 	default:
 		return errors.New("unsupported content type")
@@ -60,8 +59,26 @@ func WriteFile(filePath string, content interface{}) error {
 	return nil
 }
 
-func AppendToFile() {
+func AppendToFile(filePath string, content interface{}) error {
+	fileRef, err := OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return errors.New("error opening file")
+	}
+	defer fileRef.Close()
 
+	var writeErr error
+	switch v := content.(type) {
+	case string:
+		_, writeErr = fileRef.WriteString(v)
+	case []byte:
+		_, writeErr = fileRef.Write(v)
+	default:
+		return errors.New("unsupported content type")
+	}
+	if writeErr != nil {
+		return errors.New("error writing to file")
+	}
+	return nil
 }
 
 func DeleteFile() {
@@ -73,6 +90,13 @@ func CreateDirectory(directory string) {
 		fmt.Println("Failed to create directory")
 		return
 	}
+}
+
+func CheckIfFileExists(filePath string) bool {
+	if _, err := os.Stat(filePath); err != nil {
+		return false
+	}
+	return true
 }
 
 func isVisible(name string) bool {
@@ -95,7 +119,7 @@ func ReadDirectoryFiles() []fileWithPath {
 
 		// skip hidden directories and their contents
 		if d.IsDir() && !isVisible(d.Name()) {
-			// current directory not included in skipping
+			// current (root) directory not included in skipping
 			if path != "." {
 				return filepath.SkipDir
 			}

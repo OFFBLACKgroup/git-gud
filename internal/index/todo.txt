@@ -1,0 +1,9 @@
+// Doing: indexing files
+
+Git add called
+For each file call indexing on it
+
+// Scan the index file and find if entry exists based on pathname
+// A) If it exists, check if the hash is the same
+//    - If it isn't, update the index entry
+// B) If it doesn't exist, append an entry to index
